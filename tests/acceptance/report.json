@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-30T00:00:00Z",
+  "commit": "c80bf2b91c35c9eda4286667cb92007a78aed1f4",
+  "baseUrl": "https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http",
+  "isolation": "The catalogue (library-service) is static, seeded once at startup and read-only for the life of the deployment (specs/design/domain-model.md, library-service/book_store.bal) -- nothing is created per scenario. Every Given was verified by reading the CURRENT catalogue straight from library-service's own intranet-only endpoint (exposure: intranet, no auth, never mutated by any route), so each read is sound regardless of what else runs concurrently. No scenario reached its When: book-buddy is the only interface (type ai-agent, no web-application in this project) and exposesAPI.auth: end-user-required, so every When needed a real end-user OAuth bearer token. The registered OAuth client_id that a sign-in needs is platform-provisioned and was not obtainable through any interface available to this run -- see each scenario's blocked step for the evidence gathered before concluding that.",
+  "scenarios": [
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 6,
+      "rule": "A Team Member can search the catalogue by genre",
+      "scenario": "Asking for a genre with matches",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "the catalogue holds mystery novels including \"The Silent Patient\"",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books?genre=mystery",
+          "exit": 0,
+          "observed": "count 3, data includes {id: b1, title: \"The Silent Patient\", genre: mystery} -- precondition holds"
+        },
+        {
+          "text": "Priya asks book-buddy for a mystery novel to read",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Can you recommend a mystery novel?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} both with no Authorization header and with a bogus bearer token, confirming the gateway is enforcing end-user auth. book-buddy has no web UI (type: ai-agent, no web-application component in this project) -- POST /chat is the only interface. Completing the OIDC Authorization Code + PKCE sign-in the roles-gate ticket (#3) describes requires this project's registered OAuth client_id (the `user-auth` thunder-app dependency's platform-provisioned client). That id is not published in the validation issue, not in /tmp/validation-context.json, not in the roles-gate ticket, not in any environment variable on this pod, and the IdP's dynamic client registration endpoint (https://default-idp.../oauth2/dcr/register) refuses an unauthenticated registration attempt with `unauthorized_client`. No control exists to disable/enable -- there is no UI at all -- and the API attempt is answered 401 before any conversation turn can happen. The action could not be performed at any reachable interface."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 12,
+      "rule": "A Team Member can search the catalogue by genre",
+      "scenario": "Asking for a genre with no matches",
+      "tags": ["@negative"],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "the catalogue holds no \"romance\" books",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books?genre=romance",
+          "exit": 1,
+          "observed": "count 1, data: [{id: b15, title: \"Pride and Prejudice\", author: \"Jane Austen\", genre: romance, available: true}] -- the precondition is FALSE on this deployment: the catalogue does hold a romance book. The catalogue is static and read-only for the life of the deployment (no route anywhere adds, edits or removes a row), so this state cannot be reached by any action available to this run."
+        },
+        {
+          "text": "Priya asks book-buddy for a romance novel",
+          "keyword": "When",
+          "command": "",
+          "exit": null,
+          "observed": "Not attempted: its Given could not be established, and separately book-buddy's only interface (POST /chat) could not be authenticated -- see the identical auth gap recorded on the first scenario in this file (missing OAuth client_id; no web UI; DCR requires admin auth this run does not hold)."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 20,
+      "rule": "A Team Member can search the catalogue by author",
+      "scenario": "Asking for more books by a known author",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "the catalogue holds books by \"Tana French\"",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books?author=Tana+French",
+          "exit": 0,
+          "observed": "count 2, data includes {id: b2, title: \"In the Woods\"} and {id: b3, title: \"The Likeness\"}, both author \"Tana French\" -- precondition holds"
+        },
+        {
+          "text": "Dev asks book-buddy for more books by \"Tana French\"",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Do you have more books by Tana French?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file: no reachable OAuth client_id to complete sign-in, and no UI to route around it."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 28,
+      "rule": "A Team Member can ask about a specific book",
+      "scenario": "Asking about a title in the catalogue",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "\"In the Woods\" is in the catalogue",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books/b2",
+          "exit": 0,
+          "observed": "{id: b2, title: \"In the Woods\", author: \"Tana French\", genre: mystery, year: 2007, available: false} -- precondition holds"
+        },
+        {
+          "text": "Priya asks book-buddy about \"In the Woods\"",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Tell me about In the Woods\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 36,
+      "rule": "book-buddy always states a book's current availability",
+      "scenario": "The book is available",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "\"The Silent Patient\" is in the catalogue and marked available",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books/b1",
+          "exit": 0,
+          "observed": "{id: b1, title: \"The Silent Patient\", available: true} -- precondition holds"
+        },
+        {
+          "text": "Dev asks book-buddy whether \"The Silent Patient\" is available",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Is The Silent Patient available?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 41,
+      "rule": "book-buddy always states a book's current availability",
+      "scenario": "The book is not available",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "\"In the Woods\" is in the catalogue and marked unavailable",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books/b2",
+          "exit": 0,
+          "observed": "{id: b2, title: \"In the Woods\", available: false} -- precondition holds"
+        },
+        {
+          "text": "Priya asks book-buddy whether \"In the Woods\" is available",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Is In the Woods available?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 49,
+      "rule": "book-buddy suggests related catalogue titles alongside its answer",
+      "scenario": "A genre answer comes with related titles",
+      "tags": [],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "the catalogue holds more than one mystery novel",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books?genre=mystery",
+          "exit": 0,
+          "observed": "count 3 (The Silent Patient, In the Woods, The Likeness) -- precondition holds"
+        },
+        {
+          "text": "Dev asks book-buddy for a mystery novel to read",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Can you recommend a mystery novel?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file."
+        }
+      ]
+    },
+    {
+      "feature": "Book discovery through book-buddy",
+      "featureFile": "specs/validation/acceptance/book-discovery.feature",
+      "line": 58,
+      "rule": "book-buddy never mentions a title that is not in the catalogue",
+      "scenario": "A request for a genre the catalogue does not have",
+      "tags": ["@negative"],
+      "outcome": "blocked",
+      "steps": [
+        {
+          "text": "the catalogue holds no \"poetry\" books",
+          "keyword": "Given",
+          "command": "curl http://<library-service-clusterip>:9090/books?genre=poetry",
+          "exit": 0,
+          "observed": "count 0, data: [] -- precondition holds"
+        },
+        {
+          "text": "Priya asks book-buddy for a poetry book",
+          "keyword": "When",
+          "command": "curl -X POST https://development-default.apps.94.72.97.95.sslip.io/ai-agent-bookbuddy-book-buddy-http/chat -d '{\"message\":\"Do you have any poetry books?\"}'",
+          "exit": 1,
+          "observed": "HTTP 401 {\"error\":\"Unauthorized\",\"message\":\"Authentication failed\"} -- same auth gap as the first scenario in this file."
+        }
+      ]
+    }
+  ]
+}
