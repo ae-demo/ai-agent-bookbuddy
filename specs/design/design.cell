@@ -1,4 +1,5 @@
 title ai-agent-bookbuddy
+# book-buddy sits behind Thunder sign-in (PRD Product Decisions: Sign-in required)
 
 component library-service as "Library Service" service
 component book-buddy as "book-buddy" ai-agent
