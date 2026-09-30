@@ -1,0 +1,14 @@
+{
+  "name": "library-service",
+  "type": "service",
+  "version": "0.1.0",
+  "language": "Ballerina",
+  "buildpack": "docker",
+  "appPath": "library-service",
+  "entrypoint": "deployment/service",
+  "exposure": "intranet",
+  "dependencies": [],
+  "description": "Holds the team's library catalogue — about 15 books (title, author, genre, year, available) — as static in-memory data seeded at startup. Exposes read-only search and lookup only: it never accepts a write, never persists changes, and is reached only by book-buddy, never directly by an end user.",
+  "stories": [1, 2, 3, 4, 6],
+  "skillsPinned": ["openapi-conventions", "ballerina"]
+}

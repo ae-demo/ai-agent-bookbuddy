@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "component": "book-buddy",
+  "scenarios": [
+    {
+      "id": "SC-001",
+      "criteria": ["story-1", "story-5"],
+      "brief": {
+        "goal": "I'm in the mood for a mystery novel, what do you have?",
+        "facts": { "genre": "mystery" },
+        "withholds": []
+      },
+      "rubric": {
+        "mustCover": [
+          { "id": "MC-1", "must": "Names a mystery book that is actually in the catalogue", "weight": 2 },
+          { "id": "MC-2", "must": "States whether that book is currently available" },
+          { "id": "MC-3", "must": "Also mentions at least one other related mystery title from the catalogue" }
+        ],
+        "mustNot": [
+          { "id": "MN-1", "mustNot": "Names a book or author the catalogue lookup did not return" }
+        ]
+      }
+    },
+    {
+      "id": "SC-002",
+      "criteria": ["story-2", "story-4"],
+      "brief": {
+        "goal": "Can you find me more books by Tana French?",
+        "facts": { "author": "Tana French" },
+        "withholds": []
+      },
+      "rubric": {
+        "mustCover": [
+          { "id": "MC-1", "must": "Names a book by Tana French that is in the catalogue", "weight": 2 },
+          { "id": "MC-2", "must": "States the book's current availability" }
+        ],
+        "mustNot": [
+          { "id": "MN-1", "mustNot": "Invents a Tana French title the catalogue lookup did not return" }
+        ]
+      }
+    },
+    {
+      "id": "SC-003",
+      "criteria": ["story-3", "story-4"],
+      "brief": {
+        "goal": "Tell me about In the Woods, and is it available right now?",
+        "facts": { "title": "In the Woods" },
+        "withholds": []
+      },
+      "rubric": {
+        "mustCover": [
+          { "id": "MC-1", "must": "Describes In the Woods with its author and genre from the catalogue", "weight": 2 },
+          { "id": "MC-2", "must": "States plainly whether it is currently available" }
+        ],
+        "mustNot": [
+          { "id": "MN-1", "mustNot": "Claims an availability status the catalogue lookup did not return" }
+        ]
+      }
+    },
+    {
+      "id": "SC-004",
+      "criteria": ["story-6"],
+      "brief": {
+        "goal": "Do you have any poetry books?",
+        "facts": { "genre": "poetry" },
+        "withholds": []
+      },
+      "rubric": {
+        "mustCover": [
+          { "id": "MC-1", "must": "Says plainly that no poetry book is in the catalogue", "weight": 2 }
+        ],
+        "mustNot": [
+          { "id": "MN-1", "mustNot": "Names any poetry title, in or out of the catalogue" }
+        ]
+      }
+    }
+  ]
+}

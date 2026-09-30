@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "permissions": [
+    {
+      "resource": "chat",
+      "component": "book-buddy",
+      "description": "Conversing with book-buddy about the library catalogue",
+      "actions": [
+        { "handle": "use", "description": "Chat with book-buddy to search, look up and get recommendations for books" }
+      ]
+    }
+  ],
+  "groups": [],
+  "roles": [
+    {
+      "name": "Team Member",
+      "description": "Any team member who signs in to chat with book-buddy about the shared library.",
+      "stories": [1, 2, 3, 4, 5, 6],
+      "grants": ["chat:use"],
+      "assignTo": ["TeamMembers"]
+    }
+  ],
+  "testUsers": [
+    { "username": "test-team-member", "roles": ["Team Member"] }
+  ]
+}

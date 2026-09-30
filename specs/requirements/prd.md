@@ -28,7 +28,7 @@ book-buddy is a conversational AI agent, reached through the standard chat inter
 - Recommendations: beyond directly answering a genre/author/title/availability question, book-buddy proactively surfaces a few related books (matching genre or author) drawn only from the catalogue it can see through its allowed lookups.
 - Interaction channel: Team Members talk to book-buddy through the standard `/chat` interface via the Try it test app — no dedicated web app.
 - Backend surface: library-service exposes exactly two read endpoints — `GET /books` (`searchBooks`, with optional `genre` and `author` filters) and `GET /books/{id}` (`getBook`). book-buddy's tool allow-list is restricted to these two operations; it has no path to modify data.
-- No sign-in flow: with no web app and no user-specific data, book-buddy is not gated behind SSO for this build.
+- Sign-in required: book-buddy sits behind the platform's SSO (Thunder). A Team Member must sign in before chatting with it through the Try it test app — one baseline role, with full access to book-buddy for any signed-in team member and no further per-permission differentiation.
 
 ## Out of Scope
 

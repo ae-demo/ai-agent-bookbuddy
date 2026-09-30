@@ -1,0 +1,13 @@
+title ai-agent-bookbuddy
+
+component library-service as "Library Service" service
+component book-buddy as "book-buddy" ai-agent
+component memory-db as "Conversation Store" database
+
+east user-auth as "Thunder Auth" identity-server
+
+north -> book-buddy
+
+book-buddy -> library-service
+book-buddy -> user-auth
+book-buddy -> memory-db
